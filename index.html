@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+    <title>Home</title>
+    <style>
+      body { margin: 0; }
+    </style>
+    <script type="importmap">
+      {
+        "imports": {
+          "three": "https://cdn.jsdelivr.net/npm/three@0.168.0/build/three.module.js",
+          "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.168.0/examples/jsm/",
+          "binary-parser": "https://cdn.jsdelivr.net/npm/binary-parser@2.2.1/+esm"
+        }
+      }
+      </script>
+</head>
+<body>
+  <input type="file" id="file-selector"></input>
+  <script type="module" src="./main.js"></script>
+</body>
+</html>
