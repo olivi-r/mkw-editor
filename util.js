@@ -62,12 +62,12 @@ export function decodeRGB565(val) {
 
 export function decodeRGB5A3(val) {
   if (val & 0x8000) {
-    let r = ((val >> 10) & 0x1f) * 8;
-    let g = ((val >> 5) & 0x1f) * 8;
-    let b = (val & 0x1f) * 8;
+    let r = Math.floor(((val >> 10) & 0x1f) * 8.25);
+    let g = Math.floor(((val >> 5) & 0x1f) * 8.25);
+    let b = Math.floor((val & 0x1f) * 8.25);
     return [r, g, b, 255];
   } else {
-    let a = ((val >> 12) & 0x7) * 32;
+    let a = Math.floor(((val >> 12) & 0x7) * 36.5);
     let r = ((val >> 8) & 0xf) * 17;
     let g = ((val >> 4) & 0xf) * 17;
     let b = (val & 0xf) * 17;
