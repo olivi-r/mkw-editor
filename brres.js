@@ -14,7 +14,7 @@ const RootIndexGroup = new Parser()
   .seek(16) // skip root node
   .array("directories", {
     length: "length",
-    type: new Parser().nest({ type: IndexGroupEntry }).pointer("data", {
+    type: new Parser().nest({ type: IndexGroupEntry }).pointer("files", {
       offset: function () {
         return this.offset - this.$parent.brresOffset;
       },
@@ -81,6 +81,9 @@ const RootIndexGroup = new Parser()
             },
           }),
         }),
+      formatter: function (item) {
+        return item.files;
+      },
     }),
   });
 
