@@ -19,6 +19,17 @@ export const IndexGroupEntry = new Parser()
   .nest("name", { type: OffsetString })
   .int32("offset");
 
+export function paletteFormat(val) {
+  switch (val) {
+    case 0:
+      return "IA8";
+    case 1:
+      return "RGB565";
+    case 2:
+      return "RGB5A3";
+  }
+}
+
 export function blockHeight(format, height) {
   let blockHeight = 4;
   if (format === "I4" || format === "C4" || format === "CMPR") blockHeight = 8;
@@ -38,6 +49,32 @@ export function blockWidth(format, width) {
   return Math.ceil(width / blockWidth);
 }
 
+export function decodeIA8(val) {
+  return [val & 0xff, val & 0xff, val & 0xff, (val >> 8) & 0xff];
+}
+
+export function decodeRGB565(val) {
+  let r = ((val >> 11) & 0x1f) * 8;
+  let g = ((val >> 5) & 0x3f) * 4;
+  let b = (val & 0x1f) * 8;
+  return [r, g, b, 255];
+}
+
+export function decodeRGB5A3(val) {
+  if (val & 0x8000) {
+    let r = ((val >> 10) & 0x1f) * 8;
+    let g = ((val >> 5) & 0x1f) * 8;
+    let b = (val & 0x1f) * 8;
+    return [r, g, b, 255];
+  } else {
+    let a = ((val >> 12) & 0x7) * 32;
+    let r = ((val >> 8) & 0xf) * 17;
+    let g = ((val >> 4) & 0xf) * 17;
+    let b = (val & 0xf) * 17;
+    return [r, g, b, a];
+  }
+}
+
 export function decodeBlock(format, block) {
   let data = [];
   if (format === "I8") {
@@ -47,10 +84,7 @@ export function decodeBlock(format, block) {
   } else if (format === "RGB565") {
     for (let i = 0; i < block.length; i += 2) {
       let val = (block[i] << 8) | block[i + 1];
-      let r = ((val >> 11) & 0x1f) * 8;
-      let g = ((val >> 5) & 0x3f) * 4;
-      let b = (val & 0x1f) * 8;
-      data.push(r, g, b, 255);
+      decodeRGB565(val).forEach((v) => data.push(v));
     }
   }
   let result = [];
