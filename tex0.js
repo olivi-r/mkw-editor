@@ -35,7 +35,30 @@ const Row = new Parser().nest({
     type: Block,
   }),
   formatter: function (item) {
-    return interleave(item.row);
+    let width =
+      this.$parent.$parent.$parent.$parent.width >> this.$parent.$index;
+    let height =
+      this.$parent.$parent.$parent.$parent.height >> this.$parent.$index;
+    let format = this.$parent.$parent.$parent.$parent.format;
+
+    let bWidth = 4;
+    let bHeight = 4;
+    if (format === "I4" || format === "C4" || format === "CMPR") {
+      bWidth = 8;
+      bHeight = 8;
+    } else if (format === "I8" || format === "IA4" || format === "C8")
+      bWidth = 8;
+
+    // interleave rows whilst trimming edge blocks to image size
+    if (this.$index === blockHeight(format, height) - 1) {
+      let row = [];
+      for (let i = 0; i < item.row.length; i++)
+        row.push(
+          item.row[i].slice(0, height - blockHeight(format, height) * bHeight)
+        );
+      return interleave(row, width, blockWidth(format, width) * bWidth);
+    }
+    return interleave(item.row, width, blockWidth(format, width) * bWidth);
   },
 });
 
