@@ -1,4 +1,5 @@
 import { Parser } from "binary-parser";
+import { PAT0 } from "./pat0.js";
 import { PLT0 } from "./plt0.js";
 import { TEX0 } from "./tex0.js";
 import { IndexGroupEntry } from "./util.js";
@@ -67,7 +68,7 @@ const RootIndexGroup = new Parser()
                   1: TEX0,
                   2: new Parser(),
                   3: new Parser(),
-                  4: new Parser(),
+                  4: PAT0,
                   5: new Parser(),
                   6: new Parser(),
                   7: new Parser(),

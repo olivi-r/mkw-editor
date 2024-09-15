@@ -9,9 +9,7 @@ export const OffsetString = new Parser().nest({
     },
     type: new Parser().uint32("length").string("value", { length: "length" }),
   }),
-  formatter: function (item) {
-    return item.data.value;
-  },
+  formatter: (item) => item.data.value,
 });
 
 export const IndexGroupEntry = new Parser()
