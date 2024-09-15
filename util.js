@@ -75,28 +75,90 @@ export function decodeRGB5A3(val) {
   }
 }
 
+function interpolate(col0, col1, fraction) {
+  let r = Math.floor(col0[0] + (col1[0] - col0[0]) * fraction);
+  let g = Math.floor(col0[1] + (col1[1] - col0[1]) * fraction);
+  let b = Math.floor(col0[2] + (col1[2] - col0[2]) * fraction);
+  return [r, g, b, 255];
+}
+
 export function decodeBlock(format, block) {
   let data = [];
-  if (format === "I8") {
-    for (let val of block) {
-      data.push(val, val, val, 255);
-    }
+  let width = 32;
+
+  if (format === "I4") {
+    for (let val of block)
+      data.push(
+        (val >> 4) * 17,
+        (val >> 4) * 17,
+        (val >> 4) * 17,
+        255,
+        (val & 0xf) * 17,
+        (val & 0xf) * 17,
+        (val & 0xf) * 17,
+        255
+      );
+  } else if (format === "I8") {
+    for (let val of block) data.push(val, val, val, 255);
+  } else if (format === "IA4") {
+    for (let val of block)
+      data.push(
+        (val & 0xf) * 17,
+        (val & 0xf) * 17,
+        (val & 0xf) * 17,
+        (val >> 4) * 17
+      );
+  } else if (format === "IA8") {
+    width = 16;
+    for (let i = 0; i < 32; i += 2)
+      decodeIA8((block[i] << 8) | block[i + 1]).forEach((v) => data.push(v));
   } else if (format === "RGB565") {
-    for (let i = 0; i < block.length; i += 2) {
-      let val = (block[i] << 8) | block[i + 1];
-      decodeRGB565(val).forEach((v) => data.push(v));
+    width = 16;
+    for (let i = 0; i < 32; i += 2)
+      decodeRGB565((block[i] << 8) | block[i + 1]).forEach((v) => data.push(v));
+  } else if (format === "RGB5A3") {
+    width = 16;
+    for (let i = 0; i < 32; i += 2)
+      decodeRGB5A3((block[i] << 8) | block[i + 1]).forEach((v) => data.push(v));
+  } else if (format === "RGBA32") {
+    width = 16;
+    for (let i = 0; i < 32; i += 2) {
+      data.push(block[i + 1], block[i + 32], block[i + 33], block[i]);
     }
+  } else if (format === "CMPR") {
+    let chunks = [[], []];
+    for (let i = 0; i < 32; i += 8) {
+      let val0 = (block[i] << 8) | block[i + 1];
+      let val1 = (block[i + 2] << 8) | block[i + 3];
+      let palette = [decodeRGB565(val0), decodeRGB565(val1)];
+      if (val0 > val1) {
+        palette.push(interpolate(palette[0], palette[1], 1 / 3));
+        palette.push(interpolate(palette[0], palette[1], 2 / 3));
+      } else {
+        palette.push(interpolate(palette[0], palette[1], 1 / 2));
+        palette.push([0, 0, 0, 0]);
+      }
+
+      let chunk = [[], [], [], []];
+      for (let j = 0; j < 4; j++) {
+        chunk[j].push(palette[block[i + 4 + j] >> 6]);
+        chunk[j].push(palette[(block[i + 4 + j] >> 4) & 0x3]);
+        chunk[j].push(palette[(block[i + 4 + j] >> 2) & 0x3]);
+        chunk[j].push(palette[block[i + 4 + j] & 0x3]);
+      }
+
+      chunks[i >> 4].push(chunk);
+    }
+    interleave(chunks[0], 0, 0)
+      .flat()
+      .flat()
+      .forEach((v) => data.push(v));
+    interleave(chunks[1], 0, 0)
+      .flat()
+      .flat()
+      .forEach((v) => data.push(v));
   }
   let result = [];
-  let width = 32;
-  if (
-    format === "IA8" ||
-    format === "RGB565" ||
-    format === "RGB5A3" ||
-    format === "RGBA32" ||
-    format === "C14X2"
-  )
-    width = 16;
   while (data.length) result.push(data.splice(0, width));
   return result;
 }

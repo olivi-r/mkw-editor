@@ -12,7 +12,7 @@ import {
 const Block = new Parser().nest({
   type: new Parser().array("block", {
     length: function () {
-      return blockSize(this.$parent.$parent.$parent.$parent.format);
+      return blockSize(this.$parent.$parent.$parent.$parent.$parent.format);
     },
     type: "uint8",
   }),
@@ -50,7 +50,10 @@ const Row = new Parser().nest({
       bWidth = 8;
 
     // interleave rows whilst trimming edge blocks to image size
-    if (this.$index === blockHeight(format, height) - 1) {
+    if (
+      this.$index === blockHeight(format, height) - 1 &&
+      blockHeight(format, height) * bHeight - height > 0
+    ) {
       let row = [];
       for (let i = 0; i < item.row.length; i++)
         row.push(
@@ -89,7 +92,7 @@ export const TEX0 = new Parser()
   .uint16("width")
   .uint16("height")
   .uint32("format", { formatter: imageFormat })
-  .uint32("mipmaps")
+  .uint32("lod")
   .floatbe("min")
   .floatbe("max")
   .nest("mipmaps", {
@@ -98,9 +101,7 @@ export const TEX0 = new Parser()
         return this.$parent.offset - this.$parent.brresOffset;
       },
       type: new Parser().array("mipmaps", {
-        length: function () {
-          return this.$parent.$parent.max - this.$parent.$parent.min + 1;
-        },
+        length: "$parent.$parent.lod",
         type: Mipmap,
       }),
     }),
