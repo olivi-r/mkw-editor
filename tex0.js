@@ -1,5 +1,58 @@
 import { Parser } from "binary-parser";
-import { blockCount, blockSize, imageFormat, OffsetString } from "./util.js";
+import {
+  blockHeight,
+  blockSize,
+  blockWidth,
+  decodeBlock,
+  imageFormat,
+  interleave,
+  OffsetString,
+} from "./util.js";
+
+const Block = new Parser().nest({
+  type: new Parser().array("block", {
+    length: function () {
+      return blockSize(this.$parent.$parent.$parent.$parent.format);
+    },
+    type: "uint8",
+  }),
+  formatter: function (item) {
+    return decodeBlock(
+      this.$parent.$parent.$parent.$parent.$parent.format,
+      item.block
+    );
+  },
+});
+
+const Row = new Parser().nest({
+  type: new Parser().array("row", {
+    length: function () {
+      return blockWidth(
+        this.$parent.$parent.$parent.$parent.format,
+        this.$parent.$parent.$parent.$parent.width >> this.$parent.$index
+      );
+    },
+    type: Block,
+  }),
+  formatter: function (item) {
+    return interleave(item.row);
+  },
+});
+
+const Mipmap = new Parser().nest({
+  type: new Parser().array("blocks", {
+    length: function () {
+      return blockHeight(
+        this.$parent.$parent.$parent.format,
+        this.$parent.$parent.$parent.height >> this.$index
+      );
+    },
+    type: Row,
+  }),
+  formatter: function (item) {
+    return item.blocks.flat().flat();
+  },
+});
 
 export const TEX0 = new Parser()
   .useContextVars()
@@ -25,31 +78,7 @@ export const TEX0 = new Parser()
         length: function () {
           return this.$parent.$parent.max - this.$parent.$parent.min + 1;
         },
-        type: new Parser().nest({
-          type: new Parser().array("blocks", {
-            length: function () {
-              return blockCount(
-                this.$parent.$parent.$parent.format,
-                this.$parent.$parent.$parent.width >> this.$index,
-                this.$parent.$parent.$parent.height >> this.$index
-              );
-            },
-            type: new Parser().nest({
-              type: new Parser().array("block", {
-                length: function () {
-                  return blockSize(this.$parent.$parent.$parent.$parent.format);
-                },
-                type: "int8",
-              }),
-              formatter: function (item) {
-                return item.block;
-              },
-            }),
-          }),
-          formatter: function (item) {
-            return item.blocks;
-          },
-        }),
+        type: Mipmap,
       }),
     }),
     formatter: function (item) {

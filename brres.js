@@ -1,11 +1,6 @@
 import { Parser } from "binary-parser";
 import { TEX0 } from "./tex0.js";
-import { OffsetString } from "./util.js";
-
-const IndexGroupEntry = new Parser()
-  .seek(8) // ignore id, left index and right index
-  .nest("name", { type: OffsetString })
-  .int32("offset");
+import { IndexGroupEntry } from "./util.js";
 
 const RootIndexGroup = new Parser()
   .saveOffset("brresOffset", {

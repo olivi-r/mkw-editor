@@ -14,6 +14,69 @@ export const OffsetString = new Parser().nest({
   },
 });
 
+export const IndexGroupEntry = new Parser()
+  .seek(8) // ignore id, left index and right index
+  .nest("name", { type: OffsetString })
+  .int32("offset");
+
+export function blockHeight(format, height) {
+  let blockHeight = 4;
+  if (format === "I4" || format === "C4" || format === "CMPR") blockHeight = 8;
+  return Math.ceil(height / blockHeight);
+}
+
+export function blockWidth(format, width) {
+  let blockWidth = 8;
+  if (
+    format === "IA8" ||
+    format === "RGB565" ||
+    format === "RGB5A3" ||
+    format === "RGBA32" ||
+    format === "C14X2"
+  )
+    blockWidth = 4;
+  return Math.ceil(width / blockWidth);
+}
+
+export function decodeBlock(format, block) {
+  let data = [];
+  if (format === "I8") {
+    for (let val of block) {
+      data.push(val);
+      data.push(val);
+      data.push(val);
+      data.push(255);
+    }
+  }
+  let result = [];
+  let width = 32;
+  if (
+    format === "IA8" ||
+    format === "RGB565" ||
+    format === "RGB5A3" ||
+    format === "RGBA32" ||
+    format === "C14X2"
+  )
+    width = 16;
+  while (data.length) result.push(data.splice(0, width));
+  return result;
+}
+
+export function blockSize(format) {
+  if (format === "RGBA32") return 64;
+  return 32;
+}
+
+export function interleave(blocks) {
+  let result = [];
+  for (let i = 0; i < blocks[0].length; i++) {
+    for (let j = 0; j < blocks.length; j++) {
+      result.push(blocks[j][i]);
+    }
+  }
+  return result;
+}
+
 export function imageFormat(val) {
   switch (val) {
     case 0:
@@ -39,20 +102,4 @@ export function imageFormat(val) {
     case 14:
       return "CMPR";
   }
-}
-
-export function blockSize(format) {
-  if (format === "RGBA32") return 64;
-  return 32;
-}
-
-export function blockCount(format, width, height) {
-  let blockHeight = 4;
-  let blockWidth = 4;
-  if (format === "I8" || format === "IA4" || format === "C8") blockWidth = 8;
-  if (format === "I4" || format === "C4" || format === "CMPR") {
-    blockHeight = 8;
-    blockWidth = 8;
-  }
-  return Math.ceil(width / blockWidth) * Math.ceil(height / blockHeight);
 }
