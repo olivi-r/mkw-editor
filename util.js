@@ -42,10 +42,15 @@ export function decodeBlock(format, block) {
   let data = [];
   if (format === "I8") {
     for (let val of block) {
-      data.push(val);
-      data.push(val);
-      data.push(val);
-      data.push(255);
+      data.push(val, val, val, 255);
+    }
+  } else if (format === "RGB565") {
+    for (let i = 0; i < block.length; i += 2) {
+      let val = (block[i] << 8) | block[i + 1];
+      let r = ((val >> 11) & 0x1f) * 8;
+      let g = ((val >> 5) & 0x3f) * 4;
+      let b = (val & 0x1f) * 8;
+      data.push(r, g, b, 255);
     }
   }
   let result = [];
