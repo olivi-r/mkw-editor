@@ -110,7 +110,7 @@ export function interleave(blocks, width, blockWidth) {
   let result = [];
   for (let i = 0; i < blocks[0].length; i++) {
     for (let j = 0; j < blocks.length; j++) {
-      if (j === blocks.length - 1) {
+      if (j === blocks.length - 1 && blockWidth - width > 0) {
         result.push(blocks[j][i].slice(0, -4 * (blockWidth - width)));
       } else {
         result.push(blocks[j][i]);
