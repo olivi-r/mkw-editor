@@ -1,5 +1,5 @@
 import { Parser } from "binary-parser";
-import { IndexGroupEntry, OffsetString } from "./util.js";
+import { IndexGroupEntry, OffsetString } from "../util.js";
 
 const Offset = new Parser().nest({
   type: new Parser().uint32("offset"),

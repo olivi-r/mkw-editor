@@ -5,7 +5,7 @@ import {
   decodeRGB5A3,
   OffsetString,
   paletteFormat,
-} from "./util.js";
+} from "../util.js";
 
 export const PLT0 = new Parser()
   .useContextVars()

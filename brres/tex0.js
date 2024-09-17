@@ -7,7 +7,7 @@ import {
   imageFormat,
   interleave,
   OffsetString,
-} from "./util.js";
+} from "../util.js";
 
 const Block = new Parser().nest({
   type: new Parser().array("block", {
@@ -89,7 +89,7 @@ export const TEX0 = new Parser()
   .choice({
     tag: "version",
     choices: { 2: new Parser().seek(4) },
-    default: new Parser(),
+    defaultChoice: new Parser(),
   })
   .uint32("offset")
   .nest("name", { type: OffsetString })
