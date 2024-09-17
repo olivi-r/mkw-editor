@@ -92,12 +92,15 @@ const _BRRES = new Parser()
   .seek(6) // ignore unused version field and file size
   .uint16("offset")
   .seek(2) // ignore number of sections
-  .pointer("root", {
+  .pointer("directories", {
     offset: "offset",
     type: new Parser()
       .string("magic", { length: 4, assert: "root" })
       .uint32("size")
-      .nest({ type: RootIndexGroup }),
+      .nest({
+        type: RootIndexGroup,
+        formatter: (item) => item.directories,
+      }),
   });
 
 export const BRRES = new Parser()
