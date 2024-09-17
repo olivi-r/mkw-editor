@@ -86,6 +86,11 @@ export const TEX0 = new Parser()
   .seek(4) // skip size
   .uint32("version")
   .int32("brresOffset")
+  .choice({
+    tag: "version",
+    choices: { 2: new Parser().seek(4) },
+    default: new Parser(),
+  })
   .uint32("offset")
   .nest("name", { type: OffsetString })
   .uint32("usePalette")
