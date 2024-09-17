@@ -123,6 +123,16 @@ export function decodeBlock(format, block) {
     for (let i = 0; i < 32; i += 2) {
       data.push(block[i + 1], block[i + 32], block[i + 33], block[i]);
     }
+  } else if (format === "C4") {
+    width = 8;
+    for (let val of block) data.push(val >> 4, val & 0xf);
+  } else if (format === "C8") {
+    width = 8;
+    data = block;
+  } else if (format === "C14X2") {
+    width = 4;
+    for (let i = 0; i < 32; i += 2)
+      data.push(((block[i] & 0x3f) << 8) | block[i + 1]);
   } else if (format === "CMPR") {
     let chunks = [[], []];
     for (let i = 0; i < 32; i += 8) {
