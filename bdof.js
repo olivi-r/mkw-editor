@@ -1,0 +1,20 @@
+import { Parser } from "binary-parser";
+
+export const BDOF = new Parser()
+  .useContextVars()
+  .string("magic", { length: 4, assert: "PDOF" })
+  .seek(12)
+  .uint16("flags")
+  .int8("blurInverseAlpha")
+  .int8("blurAlpha")
+  .int8("mode")
+  .int8("amount")
+  .int8("curve")
+  .seek(1)
+  .floatbe("distance")
+  .floatbe("range")
+  .seek(4)
+  .floatbe("radius")
+  .array("scroll", { length: 2, type: "floatbe" })
+  .array("indirectScale", { length: 2, type: "floatbe" })
+  .array("scale", { length: 2, type: "floatbe" });
