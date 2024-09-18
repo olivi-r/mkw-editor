@@ -1,4 +1,5 @@
 import { Parser } from "binary-parser";
+import { CLR0 } from "./brres/clr0.js";
 import { PAT0 } from "./brres/pat0.js";
 import { PLT0 } from "./brres/plt0.js";
 import { TEX0 } from "./brres/tex0.js";
@@ -69,7 +70,7 @@ const RootIndexGroup = new Parser()
                   2: new Parser(),
                   3: new Parser(),
                   4: PAT0,
-                  5: new Parser(),
+                  5: CLR0,
                   6: new Parser(),
                   7: new Parser(),
                   8: PLT0,
