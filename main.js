@@ -25,10 +25,6 @@ fileSelector.addEventListener("change", function (event) {
 
         for (let dir of file.directories) {
           if (dir.name !== "Textures(NW4R)") continue;
-
-          let canvas = document.createElement("canvas");
-          let context = canvas.getContext("2d");
-
           for (let tex of dir.files) {
             // apply palette if applicable
             if (tex.usePalette === 1) {
@@ -49,14 +45,15 @@ fileSelector.addEventListener("change", function (event) {
 
             // render mipmaps
             for (let j = 0; j < tex.mipmaps.length; j++) {
+              let canvas = document.createElement("canvas");
+              let context = canvas.getContext("2d");
+
               canvas.width = tex.width >> j;
               canvas.height = tex.height >> j;
               let data = context.createImageData(canvas.width, canvas.height);
               data.data.set(tex.mipmaps[j]);
               context.putImageData(data, 0, 0);
-              let image = new Image();
-              image.src = canvas.toDataURL();
-              document.body.appendChild(image);
+              document.body.appendChild(canvas);
             }
           }
           break;
@@ -66,19 +63,17 @@ fileSelector.addEventListener("change", function (event) {
         let file = TEX0.parse(buffer);
         console.log(file);
 
-        let canvas = document.createElement("canvas");
-        let context = canvas.getContext("2d");
-
         // render mipmaps
         for (let i = 0; i < file.mipmaps.length; i++) {
+          let canvas = document.createElement("canvas");
+          let context = canvas.getContext("2d");
+
           canvas.width = file.width >> i;
           canvas.height = file.height >> i;
           let data = context.createImageData(canvas.width, canvas.height);
           data.data.set(file.mipmaps[i]);
           context.putImageData(data, 0, 0);
-          let image = new Image();
-          image.src = canvas.toDataURL();
-          document.body.appendChild(image);
+          document.body.appendChild(canvas);
         }
       } else {
         console.log(magic.toString(16));
