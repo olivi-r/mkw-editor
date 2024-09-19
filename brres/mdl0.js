@@ -222,63 +222,87 @@ export const MDL0 = new Parser()
       type: new Parser().int32("index"),
     }),
   })
-  .pointer("vertices", {
-    offset: function () {
-      return this.verticesOffset - this.brresOffset;
+  .choice({
+    tag: function () {
+      return this.verticesOffset === 0 ? 0 : 1;
     },
-    type: new Parser()
-      .saveOffset("brresOffset", { formatter: (item) => -item })
-      .seek(4)
-      .uint32("length")
-      .seek(16)
-      .array("entries", {
-        length: "length",
-        type: new Parser().nest({ type: IndexGroupEntry }).pointer("data", {
-          offset: function () {
-            return this.offset - this.$parent.brresOffset;
-          },
-          type: VerticesData,
-        }),
+    choices: {
+      0: new Parser(),
+      1: new Parser().pointer("vertices", {
+        offset: function () {
+          return this.verticesOffset - this.brresOffset;
+        },
+        type: new Parser()
+          .saveOffset("brresOffset", { formatter: (item) => -item })
+          .seek(4)
+          .uint32("length")
+          .seek(16)
+          .array("entries", {
+            length: "length",
+            type: new Parser().nest({ type: IndexGroupEntry }).pointer("data", {
+              offset: function () {
+                return this.offset - this.$parent.brresOffset;
+              },
+              type: VerticesData,
+            }),
+          }),
+        formatter: (item) => item.entries.map((e) => e.data),
       }),
-    formatter: (item) => item.entries.map((e) => e.data),
+    },
   })
-  .pointer("normals", {
-    offset: function () {
-      return this.normalOffset - this.brresOffset;
+  .choice({
+    tag: function () {
+      return this.normalOffset === 0 ? 0 : 1;
     },
-    type: new Parser()
-      .saveOffset("brresOffset", { formatter: (item) => -item })
-      .seek(4)
-      .uint32("length")
-      .seek(16)
-      .array("entries", {
-        length: "length",
-        type: new Parser().nest({ type: IndexGroupEntry }).pointer("data", {
-          offset: function () {
-            return this.offset - this.$parent.brresOffset;
-          },
-          type: NormalData,
-        }),
+    choices: {
+      0: new Parser(),
+      1: new Parser().pointer("normals", {
+        offset: function () {
+          return this.normalOffset - this.brresOffset;
+        },
+        type: new Parser()
+          .saveOffset("brresOffset", { formatter: (item) => -item })
+          .seek(4)
+          .uint32("length")
+          .seek(16)
+          .array("entries", {
+            length: "length",
+            type: new Parser().nest({ type: IndexGroupEntry }).pointer("data", {
+              offset: function () {
+                return this.offset - this.$parent.brresOffset;
+              },
+              type: NormalData,
+            }),
+          }),
+        formatter: (item) => item.entries.map((e) => e.data),
       }),
-    formatter: (item) => item.entries.map((e) => e.data),
+    },
   })
-  .pointer("colors", {
-    offset: function () {
-      return this.colorOffset - this.brresOffset;
+  .choice({
+    tag: function () {
+      return this.colorOffset === 0 ? 0 : 1;
     },
-    type: new Parser()
-      .saveOffset("brresOffset", { formatter: (item) => -item })
-      .seek(4)
-      .uint32("length")
-      .seek(16)
-      .array("entries", {
-        length: "length",
-        type: new Parser().nest({ type: IndexGroupEntry }).pointer("data", {
-          offset: function () {
-            return this.offset - this.$parent.brresOffset;
-          },
-          type: ColorData,
-        }),
+    choices: {
+      0: new Parser(),
+      1: new Parser().pointer("colors", {
+        offset: function () {
+          return this.colorOffset - this.brresOffset;
+        },
+        type: new Parser()
+          .saveOffset("brresOffset", { formatter: (item) => -item })
+          .seek(4)
+          .uint32("length")
+          .seek(16)
+          .array("entries", {
+            length: "length",
+            type: new Parser().nest({ type: IndexGroupEntry }).pointer("data", {
+              offset: function () {
+                return this.offset - this.$parent.brresOffset;
+              },
+              type: ColorData,
+            }),
+          }),
+        formatter: (item) => item.entries.map((e) => e.data),
       }),
-    formatter: (item) => item.entries.map((e) => e.data),
+    },
   });
