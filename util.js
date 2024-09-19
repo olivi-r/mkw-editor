@@ -216,3 +216,38 @@ export function imageFormat(val) {
       return "CMPR";
   }
 }
+
+export function Section(offsetName, sectionName, subsection, formatter) {
+  if (formatter === undefined) {
+    formatter = (item) => item.entries.map((e) => e.data);
+  }
+
+  return new Parser().choice({
+    tag: function () {
+      return this[offsetName] === 0 ? 0 : 1;
+    },
+    choices: {
+      0: new Parser(),
+      1: new Parser().pointer(sectionName, {
+        offset: function () {
+          return this[offsetName] - this.brresOffset;
+        },
+        type: new Parser()
+          .saveOffset("brresOffset", { formatter: (item) => -item })
+          .seek(4)
+          .uint32("length")
+          .seek(16)
+          .array("entries", {
+            length: "length",
+            type: new Parser().nest({ type: IndexGroupEntry }).pointer("data", {
+              offset: function () {
+                return this.offset - this.$parent.brresOffset;
+              },
+              type: subsection,
+            }),
+          }),
+        formatter: formatter,
+      }),
+    },
+  });
+}
