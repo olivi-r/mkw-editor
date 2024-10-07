@@ -251,3 +251,7 @@ export function Section(offsetName, sectionName, subsection, formatter) {
     },
   });
 }
+
+export function clamp16(x) {
+  return Math.min(Math.max(x, -32768), 32767);
+}
