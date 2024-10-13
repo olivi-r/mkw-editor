@@ -1,3 +1,4 @@
+import audioBufferToWav from "audiobuffer-to-wav";
 import { BRRES } from "./brres.js";
 import { BRSTM } from "./brstm.js";
 import { TEX0 } from "./brres/tex0.js";
@@ -81,20 +82,27 @@ fileSelector.addEventListener("change", function (event) {
 
         let audioCtx = new AudioContext();
 
-        let audioBuf = audioCtx.createBuffer(
-          file.head.dataInfo.channels,
-          data[0].length,
-          file.head.dataInfo.sampleRate
-        );
+        for (let i = 0; i < file.head.trackInfo.length; i++) {
+          let usedChannels = file.head.trackInfo[i].table.map((x) => data[x]);
+          let audioBuf = audioCtx.createBuffer(
+            usedChannels.length,
+            usedChannels[0].length,
+            file.head.dataInfo.sampleRate
+          );
 
-        for (let i = 0; i < file.head.dataInfo.channels; i++) {
-          audioBuf.copyToChannel(new Float32Array(data[i]), i);
+          for (let i = 0; i < usedChannels.length; i++) {
+            audioBuf.copyToChannel(new Float32Array(usedChannels[i]), i);
+          }
+
+          let audio = URL.createObjectURL(
+            new Blob([audioBufferToWav(audioBuf, {})], { type: "audio/wav" })
+          );
+
+          let elem = document.createElement("audio");
+          elem.src = audio;
+          elem.controls = true;
+          document.body.appendChild(elem);
         }
-
-        let source = audioCtx.createBufferSource();
-        source.buffer = audioBuf;
-        source.connect(audioCtx.destination);
-        source.start();
       } else if (magic === 0x62726573) {
         // bres
         let file = BRRES.parse(buffer);
