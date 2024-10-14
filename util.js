@@ -255,3 +255,32 @@ export function Section(offsetName, sectionName, subsection, formatter) {
 export function clamp16(x) {
   return Math.min(Math.max(x, -32768), 32767);
 }
+
+export function audioBufferToWav(buffer) {
+  let data = new Uint8Array(44 + buffer.length * buffer.numberOfChannels * 2);
+  let view = new DataView(data.buffer);
+  view.setUint32(0, 0x52494646); // "RIFF"
+  view.setUint32(4, buffer.length * buffer.numberOfChannels * 2 + 36, true);
+  view.setUint32(8, 0x57415645); // "WAVE"
+  view.setUint32(12, 0x666d7420); // "fmt "
+  view.setUint32(16, 16, true);
+  view.setUint16(20, 1, true); // PCM
+  view.setUint16(22, buffer.numberOfChannels, true);
+  view.setUint32(24, buffer.sampleRate, true);
+  view.setUint32(28, buffer.sampleRate * buffer.numberOfChannels * 2, true);
+  view.setUint16(32, buffer.numberOfChannels * 2, true);
+  view.setUint16(34, 16, true); // PCM16
+  view.setUint32(36, 0x64617461); // "data"
+  view.setUint32(40, buffer.length * buffer.numberOfChannels * 2, true);
+  for (let i = 0; i < buffer.length; i++) {
+    for (let j = 0; j < buffer.numberOfChannels; j++) {
+      let sample = buffer.getChannelData(j)[i];
+      view.setInt16(
+        44 + i * buffer.numberOfChannels * 2 + j * 2,
+        sample * 32768,
+        true
+      );
+    }
+  }
+  return data;
+}

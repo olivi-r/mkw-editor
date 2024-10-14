@@ -1,8 +1,7 @@
-import audioBufferToWav from "audiobuffer-to-wav";
 import { BRRES } from "./brres.js";
 import { BRSTM } from "./brstm.js";
 import { TEX0 } from "./brres/tex0.js";
-import { clamp16 } from "./util.js";
+import { audioBufferToWav, clamp16 } from "./util.js";
 import { decompress } from "yaz0";
 
 const fileSelector = document.getElementById("file-selector");
