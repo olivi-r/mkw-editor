@@ -1,5 +1,6 @@
 import { BRRES } from "./brres.js";
 import { BRSTM } from "./brstm.js";
+import { RARC } from "./rarc.js";
 import { TEX0 } from "./brres/tex0.js";
 import { audioBufferToWav, clamp16 } from "./util.js";
 import { decompress } from "yaz0";
@@ -20,7 +21,10 @@ fileSelector.addEventListener("change", function (event) {
         magic = new DataView(buffer.buffer).getUint32();
       }
 
-      if (magic === 0x5253544d) {
+      if (magic === 0x52415243) {
+        // RARC
+        console.log(RARC.parse(buffer));
+      } else if (magic === 0x5253544d) {
         // RSTM
         let file = BRSTM.parse(buffer);
         console.log(file);
