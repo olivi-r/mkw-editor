@@ -3,12 +3,15 @@ import { Parser } from "binary-parser";
 export const U8 = new Parser()
   .useContextVars()
   .endianness("big")
+  .saveOffset("baseOffset")
   .uint32("magic", { assert: 0x55aa382d })
   .uint32("rootOffset")
   .uint32("nodeStringSize")
   .uint32("fileDataOffset")
   .pointer("nodes", {
-    offset: "rootOffset",
+    offset: function () {
+      return this.baseOffset + this.rootOffset;
+    },
     type: new Parser()
       .nest("root", {
         type: new Parser()
@@ -27,8 +30,9 @@ export const U8 = new Parser()
           .pointer("name", {
             offset: function () {
               return (
+                this.$parent.$parent.baseOffset +
+                this.$parent.$parent.rootOffset +
                 this.$parent.root.sibling * 12 +
-                this.$root.rootOffset +
                 this.nameOffset
               );
             },
@@ -42,7 +46,9 @@ export const U8 = new Parser()
             choices: {
               1: new Parser(),
               0: new Parser().pointer("data", {
-                offset: "dataOffset",
+                offset: function () {
+                  return this.$parent.$parent.baseOffset + this.dataOffset;
+                },
                 type: new Parser().buffer("data", {
                   length: "$parent.dataSize",
                   clone: true,
