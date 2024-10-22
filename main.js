@@ -4,7 +4,7 @@ import { BRSTM } from "./brstm.js";
 import { RARC } from "./rarc.js";
 import { TEX0 } from "./brres/tex0.js";
 import { U8 } from "./u8.js";
-import { audioBufferToWav, clamp16 } from "./util.js";
+import { audioBufferToWav, clamp16, decompressLZ77 } from "./util.js";
 import { decompress } from "yaz0";
 
 const fileSelector = document.getElementById("file-selector");
@@ -20,6 +20,13 @@ fileSelector.addEventListener("change", function (event) {
       if (magic === 0x59617a30) {
         // Yaz0
         buffer = await decompress(buffer);
+        magic = new DataView(buffer.buffer).getUint32();
+      }
+
+      // Check for LZ77 compression
+      if (magic === 0x4c5a3737) {
+        // LZ77
+        buffer = decompressLZ77(buffer);
         magic = new DataView(buffer.buffer).getUint32();
       }
 
