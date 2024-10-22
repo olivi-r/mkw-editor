@@ -1,3 +1,4 @@
+import { BNR1, BNR2 } from "./bnr.js";
 import { BRRES } from "./brres.js";
 import { BRSTM } from "./brstm.js";
 import { RARC } from "./rarc.js";
@@ -28,6 +29,34 @@ fileSelector.addEventListener("change", function (event) {
       } else if (magic === 0x52415243) {
         // RARC
         console.log(RARC.parse(buffer));
+      } else if (magic === 0x424e5231) {
+        // BNR1
+        let file = BNR1.parse(buffer);
+        console.log(file);
+
+        let canvas = document.createElement("canvas");
+        let context = canvas.getContext("2d");
+
+        canvas.width = 96;
+        canvas.height = 32;
+        let data = context.createImageData(96, 32);
+        data.data.set(file.image);
+        context.putImageData(data, 0, 0);
+        document.body.appendChild(canvas);
+      } else if (magic === 0x424e5232) {
+        // BNR2
+        let file = BNR2.parse(buffer);
+        console.log(file);
+
+        let canvas = document.createElement("canvas");
+        let context = canvas.getContext("2d");
+
+        canvas.width = 96;
+        canvas.height = 32;
+        let data = context.createImageData(96, 32);
+        data.data.set(file.image);
+        context.putImageData(data, 0, 0);
+        document.body.appendChild(canvas);
       } else if (magic === 0x5253544d) {
         // RSTM
         let file = BRSTM.parse(buffer);
