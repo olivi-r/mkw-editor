@@ -3,6 +3,7 @@ import { BRRES } from "./brres.js";
 import { BRSTM } from "./brstm.js";
 import { RARC } from "./rarc.js";
 import { TEX0 } from "./brres/tex0.js";
+import { TPL } from "./tpl.js";
 import { U8 } from "./u8.js";
 import { audioBufferToWav, clamp16, decompressLZ77 } from "./util.js";
 import { decompress } from "yaz0";
@@ -36,6 +37,23 @@ fileSelector.addEventListener("change", function (event) {
       } else if (magic === 0x52415243) {
         // RARC
         console.log(RARC.parse(buffer));
+      } else if (magic === 0x20af30) {
+        // TPL
+        let file = TPL.parse(buffer);
+        console.log(file);
+        for (let i = 0; i < file.images.length; i++) {
+          for (let j = 0; j < file.images[i].mipmaps.length; j++) {
+            let canvas = document.createElement("canvas");
+            let context = canvas.getContext("2d");
+
+            canvas.width = file.images[i].width >> j;
+            canvas.height = file.images[i].height >> j;
+            let data = context.createImageData(canvas.width, canvas.height);
+            data.data.set(file.images[i].mipmaps[j]);
+            context.putImageData(data, 0, 0);
+            document.body.appendChild(canvas);
+          }
+        }
       } else if (magic === 0x424e5231) {
         // BNR1
         let file = BNR1.parse(buffer);
