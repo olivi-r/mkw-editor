@@ -5,8 +5,8 @@ import { RARC } from "./rarc.js";
 import { TEX0 } from "./brres/tex0.js";
 import { TPL } from "./tpl.js";
 import { U8 } from "./u8.js";
-import { audioBufferToWav, clamp16, decompressLZ77 } from "./util.js";
-import { decompress } from "yaz0";
+import { audioBufferToWav, clamp16 } from "./util.js";
+import { decompressLZ77, decompressYaz0 } from "./compression.js";
 
 const fileSelector = document.getElementById("file-selector");
 fileSelector.addEventListener("change", function (event) {
@@ -20,7 +20,7 @@ fileSelector.addEventListener("change", function (event) {
       // Check for Yaz0 compression
       if (magic === 0x59617a30) {
         // Yaz0
-        buffer = await decompress(buffer);
+        buffer = decompressYaz0(buffer);
         magic = new DataView(buffer.buffer).getUint32();
       }
 

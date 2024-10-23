@@ -284,34 +284,3 @@ export function audioBufferToWav(buffer) {
   }
   return data;
 }
-
-export function decompressLZ77(input) {
-  let inputOffset = 8;
-  let inputView = new DataView(input.buffer);
-
-  let output = new Int8Array(inputView.getUint32(4, true) >> 8);
-
-  let outputOffset = 0;
-  let outputView = new DataView(output.buffer);
-
-  while (true) {
-    let flags = inputView.getUint8(inputOffset++);
-    for (let i = 0; i < 8; i++) {
-      if (outputOffset >= output.length) break;
-      if ((flags & 0x80) === 0) {
-        outputView.setInt8(outputOffset++, inputView.getUint8(inputOffset++));
-      } else {
-        let reference = inputView.getUint16(inputOffset);
-        inputOffset += 2;
-        let length = (reference >> 12) + 3;
-        let offset = outputOffset - (reference & 0xfff) - 1;
-        for (let j = 0; j < length; j++) {
-          outputView.setInt8(outputOffset++, outputView.getInt8(offset++));
-        }
-      }
-      flags <<= 1;
-    }
-    if (inputOffset >= input.length) break;
-  }
-  return output;
-}
